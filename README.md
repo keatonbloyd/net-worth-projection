@@ -42,3 +42,7 @@ Follow the prompts. Vercel auto-detects the Vite framework.
 - Recharts (charts)
 - Vite (build tool)
 - localStorage (persistence)
+
+## Author
+
+Keaton Bloyd
