@@ -1,7 +1,16 @@
-import { useState, useMemo, useCallback, useRef, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  Legend, CartesianGrid, PieChart, Pie, Cell,
+  Area,
+  AreaChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from "recharts";
 
 /* ─── Constants ─── */
@@ -164,8 +173,10 @@ function computeProjection(resolved, interestPerYear) {
 function formatEUR(val) {
   if (val == null) return "";
   return new Intl.NumberFormat("de-DE", {
-    style: "currency", currency: "EUR",
-    minimumFractionDigits: 0, maximumFractionDigits: 0,
+    style: "currency",
+    currency: "EUR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(val);
 }
 function formatCompact(val) {
@@ -178,10 +189,16 @@ function formatCompact(val) {
 const AreaTooltip = ({ active, payload, label }) => {
   if (!active || !payload || !payload.length) return null;
   return (
-    <div style={{
-      background: "rgba(20,22,28,0.95)", border: "1px solid rgba(255,255,255,0.1)",
-      borderRadius: 8, padding: "12px 16px", fontFamily: "'DM Sans', sans-serif", fontSize: 14,
-    }}>
+    <div
+      style={{
+        background: "rgba(20,22,28,0.95)",
+        border: "1px solid rgba(255,255,255,0.1)",
+        borderRadius: 8,
+        padding: "12px 16px",
+        fontFamily: "'DM Sans', sans-serif",
+        fontSize: 14,
+      }}
+    >
       <div style={{ color: "#999", marginBottom: 8, fontSize: 13 }}>Age {label}</div>
       {payload.filter((p) => p.value > 0).reverse().map((p) => (
         <div key={p.dataKey} style={{ display: "flex", justifyContent: "space-between", gap: 20, padding: "2px 0" }}>
@@ -323,42 +340,75 @@ function SegmentBarChart({ segments, onChange, label, color, unit, suffix, range
     try {
       if (dragState.removing) return segments; // show as-is with visual indicator
       return moveDivider(segments, dragState.divIdx, dragState.age);
-    } catch { return segments; }
+    } catch {
+      return segments;
+    }
   }, [segments, dragState]);
 
   return (
     <div style={{ position: "relative", marginBottom: 28 }}>
-      <div style={{
-        fontSize: 14, letterSpacing: 1.5, textTransform: "uppercase",
-        color: "#555", fontWeight: 500, marginBottom: 10, paddingLeft: 2,
-      }}>
+      <div
+        style={{
+          fontSize: 14,
+          letterSpacing: 1.5,
+          textTransform: "uppercase",
+          color: "#555",
+          fontWeight: 500,
+          marginBottom: 10,
+          paddingLeft: 2,
+        }}
+      >
         {label}
       </div>
 
       {/* Floating editor */}
       {editIdx !== null && (
-        <div style={{
-          position: "absolute", top: -52, left: editPos.x,
-          transform: "translateX(-50%)", zIndex: 20,
-          display: "flex", gap: 6, animation: "fadeIn 0.15s ease",
-        }}>
+        <div
+          style={{
+            position: "absolute",
+            top: -52,
+            left: editPos.x,
+            transform: "translateX(-50%)",
+            zIndex: 20,
+            display: "flex",
+            gap: 6,
+            animation: "fadeIn 0.15s ease",
+          }}
+        >
           <input
             autoFocus
             type="text"
             inputMode="decimal"
             value={editVal}
             onChange={(e) => setEditVal(e.target.value.replace(/[^0-9.,]/g, ""))}
-            onKeyDown={(e) => { if (e.key === "Enter") commitEdit(); if (e.key === "Escape") setEditIdx(null); }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") commitEdit();
+              if (e.key === "Escape") setEditIdx(null);
+            }}
             onBlur={commitEdit}
             style={{
-              width: 90, padding: "8px 10px", background: "rgba(20,22,28,0.95)",
-              border: `1px solid ${color}55`, borderRadius: 6, color: "#f0f0f0",
-              fontFamily: "'DM Mono', monospace", fontSize: 16, textAlign: "center", outline: "none",
+              width: 90,
+              padding: "8px 10px",
+              background: "rgba(20,22,28,0.95)",
+              border: `1px solid ${color}55`,
+              borderRadius: 6,
+              color: "#f0f0f0",
+              fontFamily: "'DM Mono', monospace",
+              fontSize: 16,
+              textAlign: "center",
+              outline: "none",
             }}
           />
-          <span style={{
-            color: "#555", fontSize: 14, alignSelf: "center", fontFamily: "'DM Sans', sans-serif",
-          }}>{suffix}</span>
+          <span
+            style={{
+              color: "#555",
+              fontSize: 14,
+              alignSelf: "center",
+              fontFamily: "'DM Sans', sans-serif",
+            }}
+          >
+            {suffix}
+          </span>
         </div>
       )}
 
@@ -366,9 +416,15 @@ function SegmentBarChart({ segments, onChange, label, color, unit, suffix, range
       <div
         ref={containerRef}
         style={{
-          display: "flex", height: 90, borderRadius: 8, overflow: "visible",
-          background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
-          position: "relative", touchAction: "none", userSelect: "none",
+          display: "flex",
+          height: 90,
+          borderRadius: 8,
+          overflow: "visible",
+          background: "rgba(255,255,255,0.02)",
+          border: "1px solid rgba(255,255,255,0.06)",
+          position: "relative",
+          touchAction: "none",
+          userSelect: "none",
         }}
       >
         {displaySegments.map((seg, i) => {
@@ -381,34 +437,59 @@ function SegmentBarChart({ segments, onChange, label, color, unit, suffix, range
             <div
               key={`${seg.from}-${seg.to}`}
               style={{
-                width: `${widthPct}%`, height: "100%", position: "relative",
-                display: "flex", flexDirection: "column", justifyContent: "flex-end",
-                alignItems: "center", cursor: "pointer",
+                width: `${widthPct}%`,
+                height: "100%",
+                position: "relative",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "flex-end",
+                alignItems: "center",
+                cursor: "pointer",
                 padding: "0 2px",
               }}
               onClick={(e) => handleBarInteraction(i, e)}
-              onTouchEnd={(e) => handleBarInteraction(i, e)}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                handleBarInteraction(i, e);
+              }}
             >
               {/* Value label */}
-              <div style={{
-                fontSize: 14, fontFamily: "'DM Mono', monospace",
-                color: isEditing ? color : "#888", marginBottom: 6,
-                whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-                maxWidth: "100%", textAlign: "center",
-              }}>
-                {seg.value}{suffix}
+              <div
+                style={{
+                  fontSize: 14,
+                  fontFamily: "'DM Mono', monospace",
+                  color: isEditing ? color : "#888",
+                  marginBottom: 6,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  maxWidth: "100%",
+                  textAlign: "center",
+                }}
+              >
+                {seg.value}
+                {suffix}
               </div>
               {/* Bar */}
-              <div style={{
-                width: "calc(100% - 6px)", height: barH, borderRadius: 4,
-                background: isEditing ? color : `${color}88`,
-                transition: dragState ? "none" : "height 0.2s ease, background 0.2s ease",
-              }} />
+              <div
+                style={{
+                  width: "calc(100% - 6px)",
+                  height: barH,
+                  borderRadius: 4,
+                  background: isEditing ? color : `${color}88`,
+                  transition: dragState ? "none" : "height 0.2s ease, background 0.2s ease",
+                }}
+              />
               {/* Age range label */}
-              <div style={{
-                fontSize: 13, color: "#555", marginTop: 6,
-                fontFamily: "'DM Mono', monospace", whiteSpace: "nowrap",
-              }}>
+              <div
+                style={{
+                  fontSize: 13,
+                  color: "#555",
+                  marginTop: 6,
+                  fontFamily: "'DM Mono', monospace",
+                  whiteSpace: "nowrap",
+                }}
+              >
                 {seg.from === seg.to ? seg.from : `${seg.from}–${seg.to}`}
               </div>
             </div>
@@ -418,7 +499,8 @@ function SegmentBarChart({ segments, onChange, label, color, unit, suffix, range
         {/* Dividers */}
         {displaySegments.slice(0, -1).map((seg, i) => {
           const leftEdge = displaySegments.slice(0, i + 1).reduce(
-            (acc, s) => acc + (s.to - s.from + 1), 0
+            (acc, s) => acc + (s.to - s.from + 1),
+            0,
           );
           const leftPct = (leftEdge / totalYears) * 100;
           const isRemoving = dragState?.divIdx === i && dragState?.removing;
@@ -428,32 +510,48 @@ function SegmentBarChart({ segments, onChange, label, color, unit, suffix, range
             <div
               key={`div-${i}`}
               style={{
-                position: "absolute", left: `${leftPct}%`, top: 0,
-                width: 20, height: "100%", transform: "translateX(-50%)",
-                cursor: "ew-resize", zIndex: 10, display: "flex",
-                alignItems: "center", justifyContent: "center",
+                position: "absolute",
+                left: `${leftPct}%`,
+                top: 0,
+                width: 20,
+                height: "100%",
+                transform: "translateX(-50%)",
+                cursor: "ew-resize",
+                zIndex: 10,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
                 touchAction: "none",
               }}
               onMouseDown={(e) => handleDividerDown(i, e)}
               onTouchStart={(e) => handleDividerDown(i, e)}
             >
-              <div style={{
-                width: 3, height: "70%", borderRadius: 2,
-                background: isRemoving ? "#ff4444" : isDragging ? color : `${color}66`,
-                opacity: isRemoving ? 0.4 : 1,
-                transition: isDragging ? "none" : "all 0.15s ease",
-                boxShadow: isDragging ? `0 0 8px ${color}44` : "none",
-              }} />
+              <div
+                style={{
+                  width: 3,
+                  height: "70%",
+                  borderRadius: 2,
+                  background: isRemoving ? "#ff4444" : isDragging ? color : `${color}66`,
+                  opacity: isRemoving ? 0.4 : 1,
+                  transition: isDragging ? "none" : "all 0.15s ease",
+                  boxShadow: isDragging ? `0 0 8px ${color}44` : "none",
+                }}
+              />
             </div>
           );
         })}
       </div>
 
       {/* Hint */}
-      <div style={{
-        fontSize: 13, color: "#444", marginTop: 8, fontFamily: "'DM Sans', sans-serif",
-        textAlign: "center",
-      }}>
+      <div
+        style={{
+          fontSize: 13,
+          color: "#444",
+          marginTop: 8,
+          fontFamily: "'DM Sans', sans-serif",
+          textAlign: "center",
+        }}
+      >
         Tap to edit · Double-tap to split · Drag dividers to adjust · Drag out to merge
       </div>
     </div>
@@ -488,16 +586,30 @@ function InputCell({ value, onChange, placeholder, suffix, inputMode }) {
           background: focused ? "rgba(255,255,255,0.08)" : "transparent",
           border: "1px solid",
           borderColor: focused ? "rgba(232,146,124,0.5)" : local ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.05)",
-          borderRadius: 6, padding: "8px 10px", paddingRight: suffix ? 28 : 10,
-          color: local ? "#f0f0f0" : "#555", fontFamily: "'DM Mono', monospace",
-          fontSize: 16, outline: "none", transition: "all 0.15s ease", textAlign: "right",
+          borderRadius: 6,
+          padding: "8px 10px",
+          paddingRight: suffix ? 28 : 10,
+          color: local ? "#f0f0f0" : "#555",
+          fontFamily: "'DM Mono', monospace",
+          fontSize: 16,
+          outline: "none",
+          transition: "all 0.15s ease",
+          textAlign: "right",
         }}
       />
       {suffix && (
-        <span style={{
-          position: "absolute", right: 10, color: "#555", fontSize: 14,
-          fontFamily: "'DM Sans', sans-serif", pointerEvents: "none",
-        }}>{suffix}</span>
+        <span
+          style={{
+            position: "absolute",
+            right: 10,
+            color: "#555",
+            fontSize: 14,
+            fontFamily: "'DM Sans', sans-serif",
+            pointerEvents: "none",
+          }}
+        >
+          {suffix}
+        </span>
       )}
     </div>
   );
@@ -526,17 +638,19 @@ export default function NetWorthProjection() {
     saveTimer.current = setTimeout(() => {
       saveData({ savingsSegs, interestSegs });
     }, 400);
-    return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
+    return () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+    };
   }, [savingsSegs, interestSegs, loaded]);
 
   // Derive resolved data
   const { resolved, interestPerYear } = useMemo(
     () => resolveFromSegments(savingsSegs, interestSegs),
-    [savingsSegs, interestSegs]
+    [savingsSegs, interestSegs],
   );
   const chartData = useMemo(
     () => computeProjection(resolved, interestPerYear),
-    [resolved, interestPerYear]
+    [resolved, interestPerYear],
   );
   const finalTotal = chartData.length > 0 ? chartData[chartData.length - 1].total : 0;
 
@@ -551,8 +665,14 @@ export default function NetWorthProjection() {
       const sav = savPerYear[age];
       const rate = intPerYear[age];
       const entry = {};
-      if (sav !== lastSav) { entry.savings = String(sav); lastSav = sav; }
-      if (rate !== lastRate) { entry.rate = String(rate); lastRate = rate; }
+      if (sav !== lastSav) {
+        entry.savings = String(sav);
+        lastSav = sav;
+      }
+      if (rate !== lastRate) {
+        entry.rate = String(rate);
+        lastRate = rate;
+      }
       if (Object.keys(entry).length > 0) raw[age] = entry;
     }
     return raw;
@@ -593,11 +713,19 @@ export default function NetWorthProjection() {
 
   if (!loaded) {
     return (
-      <div style={{
-        minHeight: "100vh", background: "#0E1117", display: "flex",
-        alignItems: "center", justifyContent: "center", color: "#555",
-        fontFamily: "'DM Sans', sans-serif",
-      }}>Loading…</div>
+      <div
+        style={{
+          minHeight: "100vh",
+          background: "#0E1117",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#555",
+          fontFamily: "'DM Sans', sans-serif",
+        }}
+      >
+        Loading…
+      </div>
     );
   }
 
@@ -606,59 +734,109 @@ export default function NetWorthProjection() {
       <div style={{ maxWidth: 900, margin: "0 auto", padding: "24px 16px 40px" }}>
         {/* Header */}
         <header style={{ textAlign: "center", padding: "32px 0 24px", animation: "fadeIn 0.6s ease" }}>
-          <div style={{
-            fontSize: 13, letterSpacing: 3, textTransform: "uppercase",
-            color: "#E8927C", marginBottom: 12, fontWeight: 500,
-          }}>Net Worth Projection</div>
-          <h1 style={{
-            fontFamily: "'Playfair Display', serif", fontSize: "clamp(28px, 6vw, 48px)",
-            fontWeight: 800, lineHeight: 1.1, color: "#f0f0f0", marginBottom: 8,
-          }}>{formatEUR(finalTotal)}</h1>
+          <div
+            style={{
+              fontSize: 13,
+              letterSpacing: 3,
+              textTransform: "uppercase",
+              color: "#E8927C",
+              marginBottom: 12,
+              fontWeight: 500,
+            }}
+          >
+            Net Worth Projection
+          </div>
+          <h1
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              fontSize: "clamp(28px, 6vw, 48px)",
+              fontWeight: 800,
+              lineHeight: 1.1,
+              color: "#f0f0f0",
+              marginBottom: 8,
+            }}
+          >
+            {formatEUR(finalTotal)}
+          </h1>
           <div style={{ color: "#666", fontSize: 16 }}>Projected value at age 65</div>
         </header>
 
         {/* Toggle + Reset */}
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 12, marginBottom: 24 }}>
-          <div style={{
-            display: "flex", gap: 4, background: "rgba(255,255,255,0.04)",
-            borderRadius: 8, padding: 3, width: 200,
-          }}>
+          <div
+            style={{
+              display: "flex",
+              gap: 4,
+              background: "rgba(255,255,255,0.04)",
+              borderRadius: 8,
+              padding: 3,
+              width: 200,
+            }}
+          >
             {["Chart", "Table"].map((tab) => {
               const active = (tab === "Chart" && view === "chart") || (tab === "Table" && view === "table");
               return (
-                <button key={tab} onClick={() => setView(tab.toLowerCase())}
+                <button
+                  key={tab}
+                  onClick={() => setView(tab.toLowerCase())}
                   style={{
-                    flex: 1, padding: "10px 0",
+                    flex: 1,
+                    padding: "10px 0",
                     background: active ? "rgba(255,255,255,0.08)" : "transparent",
-                    border: "none", borderRadius: 6,
+                    border: "none",
+                    borderRadius: 6,
                     color: active ? "#f0f0f0" : "#555",
-                    fontFamily: "'DM Sans', sans-serif", fontSize: 16, fontWeight: 500,
-                    cursor: "pointer", transition: "all 0.2s ease",
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: 16,
+                    fontWeight: 500,
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
                   }}
-                >{tab}</button>
+                >
+                  {tab}
+                </button>
               );
             })}
           </div>
-          <button onClick={handleReset}
+          <button
+            onClick={handleReset}
             style={{
-              padding: "8px 14px", background: "transparent",
-              border: "1px solid rgba(255,255,255,0.08)", borderRadius: 6,
-              color: "#555", fontFamily: "'DM Sans', sans-serif", fontSize: 14,
-              cursor: "pointer", transition: "all 0.2s ease",
+              padding: "8px 14px",
+              background: "transparent",
+              border: "1px solid rgba(255,255,255,0.08)",
+              borderRadius: 6,
+              color: "#555",
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: 14,
+              cursor: "pointer",
+              transition: "all 0.2s ease",
             }}
-            onMouseEnter={(e) => { e.target.style.borderColor = "rgba(232,146,124,0.4)"; e.target.style.color = "#E8927C"; }}
-            onMouseLeave={(e) => { e.target.style.borderColor = "rgba(255,255,255,0.08)"; e.target.style.color = "#555"; }}
-          >Reset</button>
+            onMouseEnter={(e) => {
+              e.target.style.borderColor = "rgba(232,146,124,0.4)";
+              e.target.style.color = "#E8927C";
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.borderColor = "rgba(255,255,255,0.08)";
+              e.target.style.color = "#555";
+            }}
+          >
+            Reset
+          </button>
         </div>
 
         {/* Chart View */}
         {view === "chart" && (
           <div style={{ animation: "fadeIn 0.4s ease" }}>
             {/* Stacked area chart */}
-            <div style={{
-              background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
-              borderRadius: 12, padding: "24px 8px 16px", marginBottom: 24,
-            }}>
+            <div
+              style={{
+                background: "rgba(255,255,255,0.02)",
+                border: "1px solid rgba(255,255,255,0.06)",
+                borderRadius: 12,
+                padding: "24px 8px 16px",
+                marginBottom: 24,
+              }}
+            >
               <ResponsiveContainer width="100%" height={320}>
                 <AreaChart data={chartData} margin={{ top: 10, right: 16, left: 8, bottom: 0 }}>
                   <defs>
@@ -670,35 +848,65 @@ export default function NetWorthProjection() {
                     ))}
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
-                  <XAxis dataKey="age"
+                  <XAxis
+                    dataKey="age"
                     tick={{ fill: "#555", fontSize: 13, fontFamily: "'DM Mono', monospace" }}
-                    axisLine={{ stroke: "rgba(255,255,255,0.08)" }} tickLine={false} interval="preserveStartEnd"
+                    axisLine={{ stroke: "rgba(255,255,255,0.08)" }}
+                    tickLine={false}
+                    interval="preserveStartEnd"
                   />
-                  <YAxis tickFormatter={formatCompact}
+                  <YAxis
+                    tickFormatter={formatCompact}
                     tick={{ fill: "#555", fontSize: 13, fontFamily: "'DM Mono', monospace" }}
-                    axisLine={false} tickLine={false} width={64}
+                    axisLine={false}
+                    tickLine={false}
+                    width={64}
                   />
                   <Tooltip content={<AreaTooltip />} />
-                  <Legend verticalAlign="top" height={36} iconType="circle" iconSize={8}
+                  <Legend
+                    verticalAlign="top"
+                    height={36}
+                    iconType="circle"
+                    iconSize={8}
                     wrapperStyle={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#888" }}
                   />
                   {DECADES.map((d) => (
-                    <Area key={d.key} type="monotone" dataKey={d.key} name={d.label} stackId="1"
-                      stroke={d.color} strokeWidth={1.5} fill={`url(#grad_${d.key})`} animationDuration={800}
+                    <Area
+                      key={d.key}
+                      type="monotone"
+                      dataKey={d.key}
+                      name={d.label}
+                      stackId="1"
+                      stroke={d.color}
+                      strokeWidth={1.5}
+                      fill={`url(#grad_${d.key})`}
+                      animationDuration={800}
                     />
                   ))}
-                  <Area type="monotone" dataKey="total" name="Total" stroke={TOTAL_COLOR}
-                    strokeWidth={2} strokeDasharray="6 3" fill="none" animationDuration={1000}
+                  <Area
+                    type="monotone"
+                    dataKey="total"
+                    name="Total"
+                    stroke={TOTAL_COLOR}
+                    strokeWidth={2}
+                    strokeDasharray="6 3"
+                    fill="none"
+                    animationDuration={1000}
                   />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
 
             {/* Segment bar charts */}
-            <div style={{
-              background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
-              borderRadius: 12, padding: "24px 16px 16px", marginBottom: 24,
-            }}>
+            <div
+              style={{
+                background: "rgba(255,255,255,0.02)",
+                border: "1px solid rgba(255,255,255,0.06)",
+                borderRadius: 12,
+                padding: "24px 16px 16px",
+                marginBottom: 24,
+              }}
+            >
               <SegmentBarChart
                 segments={savingsSegs}
                 onChange={setSavingsSegs}
@@ -725,18 +933,57 @@ export default function NetWorthProjection() {
 
         {/* Table View */}
         {view === "table" && (
-          <div style={{
-            background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
-            borderRadius: 12, overflow: "hidden", animation: "fadeIn 0.4s ease",
-          }}>
-            <div style={{
-              display: "grid", gridTemplateColumns: "56px 1fr 1fr", gap: 8,
-              padding: "14px 16px", borderBottom: "1px solid rgba(255,255,255,0.06)",
-              position: "sticky", top: 0, background: "#12151C", zIndex: 2,
-            }}>
-              <div style={{ fontSize: 13, letterSpacing: 1, textTransform: "uppercase", color: "#555", fontWeight: 500 }}>Age</div>
-              <div style={{ fontSize: 13, letterSpacing: 1, textTransform: "uppercase", color: "#555", fontWeight: 500, textAlign: "right" }}>Monthly (EUR)</div>
-              <div style={{ fontSize: 13, letterSpacing: 1, textTransform: "uppercase", color: "#555", fontWeight: 500, textAlign: "right" }}>Interest (%)</div>
+          <div
+            style={{
+              background: "rgba(255,255,255,0.02)",
+              border: "1px solid rgba(255,255,255,0.06)",
+              borderRadius: 12,
+              overflow: "hidden",
+              animation: "fadeIn 0.4s ease",
+            }}
+          >
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "56px 1fr 1fr",
+                gap: 8,
+                padding: "14px 16px",
+                borderBottom: "1px solid rgba(255,255,255,0.06)",
+                position: "sticky",
+                top: 0,
+                background: "#12151C",
+                zIndex: 2,
+              }}
+            >
+              <div
+                style={{ fontSize: 13, letterSpacing: 1, textTransform: "uppercase", color: "#555", fontWeight: 500 }}
+              >
+                Age
+              </div>
+              <div
+                style={{
+                  fontSize: 13,
+                  letterSpacing: 1,
+                  textTransform: "uppercase",
+                  color: "#555",
+                  fontWeight: 500,
+                  textAlign: "right",
+                }}
+              >
+                Monthly (EUR)
+              </div>
+              <div
+                style={{
+                  fontSize: 13,
+                  letterSpacing: 1,
+                  textTransform: "uppercase",
+                  color: "#555",
+                  fontWeight: 500,
+                  textAlign: "right",
+                }}
+              >
+                Interest (%)
+              </div>
             </div>
             <div style={{ maxHeight: 480, overflowY: "auto", padding: "4px 0" }}>
               {AGES.map((age, idx) => {
@@ -748,24 +995,43 @@ export default function NetWorthProjection() {
                 return (
                   <div key={age}>
                     {isDecadeStart && (
-                      <div style={{
-                        padding: "10px 16px 4px", fontSize: 13, letterSpacing: 1.5,
-                        textTransform: "uppercase", color: decadeColor, fontWeight: 600, opacity: 0.7,
-                      }}>
+                      <div
+                        style={{
+                          padding: "10px 16px 4px",
+                          fontSize: 13,
+                          letterSpacing: 1.5,
+                          textTransform: "uppercase",
+                          color: decadeColor,
+                          fontWeight: 600,
+                          opacity: 0.7,
+                        }}
+                      >
                         {DECADES.find((d) => d.from === age)?.label}
                       </div>
                     )}
-                    <div style={{
-                      display: "grid", gridTemplateColumns: "56px 1fr 1fr", gap: 8,
-                      padding: "4px 16px", alignItems: "center",
-                    }}>
-                      <div style={{
-                        fontSize: 16, fontFamily: "'DM Mono', monospace",
-                        color: decadeColor || "#666", fontWeight: 500,
-                      }}>{age}</div>
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "56px 1fr 1fr",
+                        gap: 8,
+                        padding: "4px 16px",
+                        alignItems: "center",
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: 16,
+                          fontFamily: "'DM Mono', monospace",
+                          color: decadeColor || "#666",
+                          fontWeight: 500,
+                        }}
+                      >
+                        {age}
+                      </div>
                       <InputCell
                         value={entry.savings ?? ""}
-                        onChange={(v) => updateTableField(age, "savings", v)}
+                        onChange={(v) =>
+                          updateTableField(age, "savings", v)}
                         placeholder={res.savings > 0 ? String(res.savings) : "—"}
                         suffix="€"
                       />
@@ -793,46 +1059,80 @@ export default function NetWorthProjection() {
           const pieTotal = pieData.reduce((a, b) => a + b.value, 0);
 
           return (
-            <div style={{
-              background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
-              borderRadius: 12, padding: "24px 16px", marginTop: 24,
-              animation: "fadeIn 0.6s ease 0.2s both",
-              display: "flex", flexDirection: "column", alignItems: "center",
-            }}>
-              <div style={{
-                fontSize: 14, letterSpacing: 2, textTransform: "uppercase",
-                color: "#555", fontWeight: 500, marginBottom: 16,
-              }}>Contribution Breakdown at 65</div>
-              <div style={{
-                display: "flex", flexWrap: "wrap", alignItems: "center",
-                justifyContent: "center", gap: 24, width: "100%",
-              }}>
+            <div
+              style={{
+                background: "rgba(255,255,255,0.02)",
+                border: "1px solid rgba(255,255,255,0.06)",
+                borderRadius: 12,
+                padding: "24px 16px",
+                marginTop: 24,
+                animation: "fadeIn 0.6s ease 0.2s both",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 14,
+                  letterSpacing: 2,
+                  textTransform: "uppercase",
+                  color: "#555",
+                  fontWeight: 500,
+                  marginBottom: 16,
+                }}
+              >
+                Contribution Breakdown at 65
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 24,
+                  width: "100%",
+                }}
+              >
                 <ResponsiveContainer width={200} height={200}>
                   <PieChart>
-                    <Pie data={pieData} dataKey="value" cx="50%" cy="50%"
-                      innerRadius={50} outerRadius={85} paddingAngle={2}
-                      strokeWidth={0} animationDuration={800}
+                    <Pie
+                      data={pieData}
+                      dataKey="value"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={50}
+                      outerRadius={85}
+                      paddingAngle={2}
+                      strokeWidth={0}
+                      animationDuration={800}
                     >
-                      {pieData.map((entry, i) => (
-                        <Cell key={i} fill={entry.color} />
-                      ))}
+                      {pieData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
                     </Pie>
-                    <Tooltip content={({ active, payload }) => {
-                      if (!active || !payload || !payload.length) return null;
-                      const d = payload[0];
-                      const pct = pieTotal > 0 ? ((d.value / pieTotal) * 100).toFixed(1) : 0;
-                      return (
-                        <div style={{
-                          background: "rgba(20,22,28,0.95)", border: "1px solid rgba(255,255,255,0.1)",
-                          borderRadius: 8, padding: "8px 12px", fontFamily: "'DM Sans', sans-serif", fontSize: 14,
-                        }}>
-                          <span style={{ color: d.payload.color, fontWeight: 500 }}>{d.name}</span>
-                          <span style={{ color: "#eee", marginLeft: 12, fontFamily: "'DM Mono', monospace" }}>
-                            {formatEUR(d.value)} ({pct}%)
-                          </span>
-                        </div>
-                      );
-                    }} />
+                    <Tooltip
+                      content={({ active, payload }) => {
+                        if (!active || !payload || !payload.length) return null;
+                        const d = payload[0];
+                        const pct = pieTotal > 0 ? ((d.value / pieTotal) * 100).toFixed(1) : 0;
+                        return (
+                          <div
+                            style={{
+                              background: "rgba(20,22,28,0.95)",
+                              border: "1px solid rgba(255,255,255,0.1)",
+                              borderRadius: 8,
+                              padding: "8px 12px",
+                              fontFamily: "'DM Sans', sans-serif",
+                              fontSize: 14,
+                            }}
+                          >
+                            <span style={{ color: d.payload.color, fontWeight: 500 }}>{d.name}</span>
+                            <span style={{ color: "#eee", marginLeft: 12, fontFamily: "'DM Mono', monospace" }}>
+                              {formatEUR(d.value)} ({pct}%)
+                            </span>
+                          </div>
+                        );
+                      }}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -840,7 +1140,9 @@ export default function NetWorthProjection() {
                     const pct = pieTotal > 0 ? ((d.value / pieTotal) * 100).toFixed(1) : 0;
                     return (
                       <div key={d.name} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        <div style={{ width: 12, height: 12, borderRadius: "50%", background: d.color, flexShrink: 0 }} />
+                        <div
+                          style={{ width: 12, height: 12, borderRadius: "50%", background: d.color, flexShrink: 0 }}
+                        />
                         <div>
                           <div style={{ fontSize: 15, color: "#ccc", fontWeight: 500 }}>Ages {d.name}</div>
                           <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 16, color: d.color }}>
@@ -856,10 +1158,15 @@ export default function NetWorthProjection() {
           );
         })()}
 
-        <div style={{
-          textAlign: "center", marginTop: 24, fontSize: 13, color: "#444",
-          fontFamily: "'DM Mono', monospace",
-        }}>
+        <div
+          style={{
+            textAlign: "center",
+            marginTop: 24,
+            fontSize: 13,
+            color: "#444",
+            fontFamily: "'DM Mono', monospace",
+          }}
+        >
           Monthly compounding · EUR · Ages 18–65
         </div>
       </div>
