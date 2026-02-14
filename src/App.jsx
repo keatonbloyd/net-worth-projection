@@ -210,6 +210,194 @@ const AreaTooltip = ({ active, payload, label }) => {
   );
 };
 
+/* ─── DialEditor ─── */
+const DIAL_SIZE = 130;
+const DIAL_STROKE = 12;
+const DIAL_R = (DIAL_SIZE - DIAL_STROKE) / 2;
+const DIAL_C = 2 * Math.PI * DIAL_R;
+const DIAL_CX = DIAL_SIZE / 2;
+const DIAL_CY = DIAL_SIZE / 2;
+
+function DialEditor({ editVal, setEditVal, onLiveChange, onCommit, onCancel, color, suffix }) {
+  const dialRef = useRef(null);
+  const rotRef = useRef({ lastAngle: 0, total: 0, startVal: 0, active: false });
+  const [rotation, setRotation] = useState(0);
+
+  const editValRef = useRef(editVal);
+  editValRef.current = editVal;
+  const onLiveChangeRef = useRef(onLiveChange);
+  onLiveChangeRef.current = onLiveChange;
+  const setEditValRef = useRef(setEditVal);
+  setEditValRef.current = setEditVal;
+
+  const handleDown = useCallback((e) => {
+    const el = dialRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const clientX = e.clientX ?? e.touches?.[0]?.clientX ?? 0;
+    const clientY = e.clientY ?? e.touches?.[0]?.clientY ?? 0;
+    const dist = Math.sqrt((clientX - cx) ** 2 + (clientY - cy) ** 2);
+    if (dist < DIAL_R - DIAL_STROKE * 1.5 || dist > DIAL_R + DIAL_STROKE * 1.5) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const angle = Math.atan2(clientY - cy, clientX - cx);
+    const currentVal = parseFloat(editValRef.current) || 0;
+    rotRef.current = { lastAngle: angle, total: 0, startVal: currentVal, active: true };
+    setRotation(0);
+  }, []);
+
+  useEffect(() => {
+    const handleMove = (e) => {
+      const r = rotRef.current;
+      if (!r.active) return;
+      e.preventDefault();
+      const el = dialRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const clientX = e.clientX ?? e.touches?.[0]?.clientX ?? 0;
+      const clientY = e.clientY ?? e.touches?.[0]?.clientY ?? 0;
+      const angle = Math.atan2(clientY - cy, clientX - cx);
+      let delta = angle - r.lastAngle;
+      if (delta > Math.PI) delta -= 2 * Math.PI;
+      if (delta < -Math.PI) delta += 2 * Math.PI;
+      r.total += delta;
+      r.lastAngle = angle;
+      const multiplier = Math.pow(2, r.total / (2 * Math.PI));
+      const raw = r.startVal * multiplier;
+      const newVal = raw === 0 ? 0 : parseFloat(Math.max(0, raw).toPrecision(2));
+      setRotation(r.total);
+      setEditValRef.current(String(newVal));
+      onLiveChangeRef.current(newVal);
+    };
+    const handleUp = () => {
+      rotRef.current.active = false;
+    };
+    window.addEventListener("mousemove", handleMove);
+    window.addEventListener("mouseup", handleUp);
+    window.addEventListener("touchmove", handleMove, { passive: false });
+    window.addEventListener("touchend", handleUp);
+    return () => {
+      window.removeEventListener("mousemove", handleMove);
+      window.removeEventListener("mouseup", handleUp);
+      window.removeEventListener("touchmove", handleMove);
+      window.removeEventListener("touchend", handleUp);
+    };
+  }, []);
+
+  const absFraction = (Math.abs(rotation) % (2 * Math.PI)) / (2 * Math.PI);
+  const isPositive = rotation >= 0;
+  const fullTurns = Math.floor(Math.abs(rotation) / (2 * Math.PI));
+  const dotAngle = -Math.PI / 2 + rotation;
+  const dotX = DIAL_CX + DIAL_R * Math.cos(dotAngle);
+  const dotY = DIAL_CY + DIAL_R * Math.sin(dotAngle);
+  const multiplier = Math.pow(2, rotation / (2 * Math.PI));
+
+  return (
+    <div
+      ref={dialRef}
+      style={{ position: "relative", width: DIAL_SIZE, height: DIAL_SIZE, touchAction: "none" }}
+      onMouseDown={handleDown}
+      onTouchStart={handleDown}
+    >
+      <svg width={DIAL_SIZE} height={DIAL_SIZE} style={{ position: "absolute", top: 0, left: 0, overflow: "visible" }}>
+        <circle
+          cx={DIAL_CX}
+          cy={DIAL_CY}
+          r={DIAL_R}
+          fill="none"
+          stroke="rgba(255,255,255,0.08)"
+          strokeWidth={DIAL_STROKE}
+        />
+        {absFraction > 0.005 && (
+          <circle
+            cx={DIAL_CX}
+            cy={DIAL_CY}
+            r={DIAL_R}
+            fill="none"
+            stroke={isPositive ? color : "#ff6b6b"}
+            strokeWidth={DIAL_STROKE}
+            strokeLinecap="round"
+            strokeDasharray={DIAL_C}
+            strokeDashoffset={DIAL_C * (1 - absFraction)}
+            transform={isPositive
+              ? `rotate(-90 ${DIAL_CX} ${DIAL_CY})`
+              : `rotate(${-90 - absFraction * 360} ${DIAL_CX} ${DIAL_CY})`}
+            opacity={0.5 + Math.min(fullTurns * 0.15, 0.5)}
+          />
+        )}
+        <circle cx={DIAL_CX} cy={DIAL_CY - DIAL_R} r={3} fill="rgba(255,255,255,0.3)" />
+        {Math.abs(rotation) > 0.05 && (
+          <circle
+            cx={dotX}
+            cy={dotY}
+            r={6}
+            fill={isPositive ? color : "#ff6b6b"}
+            stroke="rgba(0,0,0,0.3)"
+            strokeWidth={1}
+          />
+        )}
+      </svg>
+      <div
+        style={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 2,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <input
+            autoFocus
+            type="text"
+            inputMode="decimal"
+            value={editVal}
+            onChange={(e) => setEditVal(e.target.value.replace(/[^0-9.,]/g, ""))}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") onCommit();
+              if (e.key === "Escape") onCancel();
+            }}
+            style={{
+              width: 70,
+              padding: "6px 8px",
+              background: "rgba(20,22,28,0.95)",
+              border: `1px solid ${color}55`,
+              borderRadius: 6,
+              color: "#f0f0f0",
+              fontFamily: "'DM Mono', monospace",
+              fontSize: 15,
+              textAlign: "center",
+              outline: "none",
+            }}
+          />
+          <span style={{ color: "#555", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }}>
+            {suffix}
+          </span>
+        </div>
+        {Math.abs(rotation) > 0.1 && (
+          <div
+            style={{
+              fontSize: 11,
+              fontFamily: "'DM Mono', monospace",
+              color: isPositive ? color : "#ff6b6b",
+              opacity: 0.8,
+            }}
+          >
+            ×{multiplier.toFixed(2)}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ─── SegmentBarChart ─── */
 function SegmentBarChart({ segments, onChange, label, color, unit, suffix, rangeFrom, rangeTo }) {
   const containerRef = useRef(null);
@@ -361,55 +549,44 @@ function SegmentBarChart({ segments, onChange, label, color, unit, suffix, range
         {label}
       </div>
 
-      {/* Floating editor */}
+      {/* Dial editor with backdrop */}
       {editIdx !== null && (
-        <div
-          style={{
-            position: "absolute",
-            top: -52,
-            left: editPos.x,
-            transform: "translateX(-50%)",
-            zIndex: 20,
-            display: "flex",
-            gap: 6,
-            animation: "fadeIn 0.15s ease",
-          }}
-        >
-          <input
-            autoFocus
-            type="text"
-            inputMode="decimal"
-            value={editVal}
-            onChange={(e) => setEditVal(e.target.value.replace(/[^0-9.,]/g, ""))}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") commitEdit();
-              if (e.key === "Escape") setEditIdx(null);
+        <>
+          <div
+            style={{ position: "fixed", inset: 0, zIndex: 19 }}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              commitEdit();
             }}
-            onBlur={commitEdit}
-            style={{
-              width: 90,
-              padding: "8px 10px",
-              background: "rgba(20,22,28,0.95)",
-              border: `1px solid ${color}55`,
-              borderRadius: 6,
-              color: "#f0f0f0",
-              fontFamily: "'DM Mono', monospace",
-              fontSize: 16,
-              textAlign: "center",
-              outline: "none",
+            onTouchStart={(e) => {
+              e.preventDefault();
+              commitEdit();
             }}
           />
-          <span
+          <div
             style={{
-              color: "#555",
-              fontSize: 14,
-              alignSelf: "center",
-              fontFamily: "'DM Sans', sans-serif",
+              position: "absolute",
+              top: -(DIAL_SIZE / 2 + 20),
+              left: editPos.x,
+              transform: "translateX(-50%)",
+              zIndex: 20,
+              animation: "fadeIn 0.15s ease",
             }}
           >
-            {suffix}
-          </span>
-        </div>
+            <DialEditor
+              editVal={editVal}
+              setEditVal={setEditVal}
+              onLiveChange={(newVal) => {
+                const updated = segments.map((s, i) => i === editIdx ? { ...s, value: newVal } : s);
+                onChange(updated);
+              }}
+              onCommit={commitEdit}
+              onCancel={() => setEditIdx(null)}
+              color={color}
+              suffix={suffix}
+            />
+          </div>
+        </>
       )}
 
       {/* Bar container */}
@@ -552,7 +729,7 @@ function SegmentBarChart({ segments, onChange, label, color, unit, suffix, range
           textAlign: "center",
         }}
       >
-        Tap to edit · Double-tap to split · Drag dividers to adjust · Drag out to merge
+        Tap to edit · Rotate dial to scale · Double-tap to split · Drag dividers to adjust · Drag out to merge
       </div>
     </div>
   );
