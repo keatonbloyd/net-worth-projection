@@ -779,6 +779,10 @@ export default function NetWorthProjection() {
                 <button
                   key={tab}
                   onClick={() => setView(tab.toLowerCase())}
+                  onTouchEnd={(e) => {
+                    e.preventDefault();
+                    setView(tab.toLowerCase());
+                  }}
                   style={{
                     flex: 1,
                     padding: "10px 0",
